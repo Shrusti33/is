@@ -1,0 +1,93 @@
+def toLowerCase(text):
+    return text.lower()
+
+def removeSpaces(text):
+    newText = ""
+    for i in text:
+        if i == " ":
+            continue
+        else:
+            newText = newText + i
+    return newText
+
+def Diagraph(text):
+    Diagraph = []
+    group = 0
+    for i in range(2, len(text), 2):
+        Diagraph.append(text[group:i])
+        group = i
+    Diagraph.append(text[group:])
+    return Diagraph
+
+def FillerLetter(text):
+    k = len(text)
+    if k % 2 == 0:
+        for i in range(0, k, 2):
+            if text[i] == text[i + 1]:
+                new_word = text[0:i + 1] + str('x') + text[i + 1:]
+                new_word = FillerLetter(new_word)
+                break
+            else:
+                new_word = text
+    else:
+        for i in range(0, k - 1, 2):
+            if text[i] == text[i + 1]:
+                new_word = text[0:i + 1] + str('x') + text[i + 1:]
+                new_word = FillerLetter(new_word)
+                break
+            else:
+                new_word = text
+    return new_word
+
+def generateKeyMatrix(key):
+    key = toLowerCase(key)
+    key = FillerLetter(key)
+    key_matrix = [[0] * 5 for _ in range(5)]
+    chars_added = set()
+
+    i, j = 0, 0
+    for char in key + 'abcdefghiklmnopqrstuvwxyz':
+        if char not in chars_added:
+            key_matrix[i][j] = char
+            chars_added.add(char)
+            j += 1
+            if j == 5:
+                j = 0
+                i += 1
+
+    return key_matrix
+
+def search(mat, element):
+    for i in range(5):
+        for j in range(5):
+            if mat[i][j] == element:
+                return i, j
+
+def encrypt_Playfair(plaintext, key_matrix):
+    ciphertext = ""
+    for pair in Diagraph(FillerLetter(removeSpaces(toLowerCase(plaintext)))):
+        char1, char2 = pair[0], pair[1]
+        row1, col1 = search(key_matrix, char1)
+        row2, col2 = search(key_matrix, char2)
+
+        if row1 == row2:
+            ciphertext += key_matrix[row1][(col1 + 1) % 5] + key_matrix[row2][(col2 + 1) % 5]
+        elif col1 == col2:
+            ciphertext += key_matrix[(row1 + 1) % 5][col1] + key_matrix[(row2 + 1) % 5][col2]
+        else:
+            ciphertext += key_matrix[row1][col2] + key_matrix[row2][col1]
+
+    return ciphertext
+
+text_plain = 'ATTACK'
+key = "MONARCHY"
+
+key_matrix = generateKeyMatrix(key)
+ciphertext = encrypt_Playfair(text_plain, key_matrix)
+
+print("Key Matrix:")
+for row in key_matrix:
+    print(row)
+
+print("\nPlain Text:", text_plain)
+print("Cipher Text:", ciphertext)
