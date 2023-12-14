@@ -1,0 +1,36 @@
+import pandas as pd
+
+def encrypt(pt, key):
+    cols = list(range(len(pt)))
+    df = pd.DataFrame(columns=cols)
+
+    for col in cols:
+        df[col] = [""] * key
+
+    col = 0
+    row = 0
+    direction = 1
+
+    for char in pt:
+        df.iloc[row, col] = char
+        row += direction
+
+        if row == key - 1 or row == 0:
+            direction *= -1
+
+        col += 1
+
+    ciphertext = ''.join(df.values.flatten())
+    
+    return df, ciphertext
+
+# Example Usage
+plaintext = "RAINGOAWAY"
+key = 4
+encrypted_df, ciphertext = encrypt(plaintext, key)
+
+print("Encrypted DataFrame:")
+print(encrypted_df)
+
+print("\nCiphertext:")
+print(ciphertext)
